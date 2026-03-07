@@ -1,0 +1,38 @@
+// Test 1: Verify response status is 200
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+// Test 2: Verify response contains required OAuth2 token fields
+pm.test("Response contains required OAuth2 token fields", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property("token_type");
+    pm.expect(jsonData).to.have.property("access_token");
+    pm.expect(jsonData).to.have.property("expires_in");
+});
+
+// Test 3: Verify token_type is "Bearer"
+pm.test("Token type is Bearer", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData.token_type).to.eql("Bearer");
+});
+
+// Test 4: Verify access_token is a non-empty string
+pm.test("Access token is a non-empty string", function () {
+    const jsonData = pm.response.json();
+    pm.expect(jsonData.access_token).to.be.a("string");
+    pm.expect(jsonData.access_token).to.not.be.empty;
+});
+
+// Test 5: Verify expires_in is a number
+pm.test("Expires_in is a number", function () {
+    const jsonData = pm.response.json();
+    // Microsoft returns expires_in as a string, so we check if it can be parsed as a number
+    pm.expect(Number(jsonData.expires_in)).to.be.a("number");
+    pm.expect(Number(jsonData.expires_in)).to.be.above(0);
+});
+
+// Store access_token in environment variable for subsequent requests
+const jsonData = pm.response.json();
+pm.environment.set("access_token", jsonData.access_token);
+console.log("Access token stored in environment variable 'access_token'");
